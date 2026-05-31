@@ -193,6 +193,9 @@ describe('Storefront flow', function() {
       expect(bagPage.text).to.include('value="upi"');
       expect(bagPage.text).to.include('data-payment-utr');
       expect(bagPage.text).to.include('goldencrownqa@upi');
+      expect(bagPage.text).to.include('upi://pay?pa=goldencrownqa%40upi');
+      expect(bagPage.text).to.include('am=99.00');
+      expect(bagPage.text).to.include('Pay with any UPI app');
       expect(bagToken).to.be.a('string');
 
       const missingUtr = await agent

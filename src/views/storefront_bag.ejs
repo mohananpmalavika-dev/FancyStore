@@ -117,7 +117,7 @@
                   <input name="delivery_date" type="date" />
                 </label>
                 <label class="field">Payment
-                  <select name="payment_method" data-payment-method>
+                  <select name="payment_method" data-payment-method data-upi-link="<%= upiPaymentLink || '' %>">
                     <option value="pay_on_delivery">Pay on delivery</option>
                     <option value="upi">UPI</option>
                     <option value="shop_contact">Shop will contact</option>
@@ -125,8 +125,9 @@
                 </label>
               </div>
               <div class="upi-payment-box" data-upi-payment hidden>
-                <% if (storeProfile && storeProfile.upi_id) { %>
-                  <p>Pay to <strong><%= storeProfile.upi_id %></strong></p>
+                <% if (storeProfile && storeProfile.upi_id && upiPaymentLink) { %>
+                  <p>Pay <strong><%= formatRupees(totals.total) %></strong> to <strong><%= storeProfile.upi_id %></strong></p>
+                  <a class="button button-dark upi-pay-button" href="<%= upiPaymentLink %>" data-upi-pay-link>Pay with any UPI app</a>
                 <% } else { %>
                   <p>The shop has not added a UPI ID yet.</p>
                 <% } %>
@@ -187,16 +188,20 @@
       const paymentMethod = document.querySelector('[data-payment-method]');
       const upiPayment = document.querySelector('[data-upi-payment]');
       const paymentUtr = document.querySelector('[data-payment-utr]');
+      const upiLink = paymentMethod ? paymentMethod.dataset.upiLink : '';
 
-      function syncUpiPayment() {
+      function syncUpiPayment(openApp) {
         const isUpi = paymentMethod && paymentMethod.value === 'upi';
         if (upiPayment) upiPayment.hidden = !isUpi;
         if (paymentUtr) paymentUtr.required = isUpi;
+        if (isUpi && openApp && upiLink) {
+          window.location.href = upiLink;
+        }
       }
 
       if (paymentMethod) {
-        paymentMethod.addEventListener('change', syncUpiPayment);
-        syncUpiPayment();
+        paymentMethod.addEventListener('change', () => syncUpiPayment(true));
+        syncUpiPayment(false);
       }
     </script>
   </body>

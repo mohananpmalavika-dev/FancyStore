@@ -60,6 +60,20 @@ function withNotice(target, key, message) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
+function upiPaymentLink(profile, amount) {
+  const upiId = String((profile && profile.upi_id) || '').trim();
+  const payableAmount = Number(amount || 0);
+  if (!upiId || payableAmount <= 0) return '';
+
+  const link = new URL('upi://pay');
+  link.searchParams.set('pa', upiId);
+  link.searchParams.set('pn', 'The Golden Crown');
+  link.searchParams.set('am', payableAmount.toFixed(2));
+  link.searchParams.set('cu', 'INR');
+  link.searchParams.set('tn', 'The Golden Crown order payment');
+  return link.toString();
+}
+
 function requireCustomer(req, res, next) {
   if (!res.locals.currentUser) {
     return res.redirect(`/login?next=${encodeURIComponent(req.originalUrl || '/shop')}`);
@@ -404,6 +418,7 @@ router.get('/bag', requireCustomer, (req, res) => {
     title: 'Your Bag',
     items: totals.lines,
     totals,
+    upiPaymentLink: upiPaymentLink(res.locals.storeProfile, totals.total),
     notice: req.query.notice || null,
     error: req.query.error || null,
   });

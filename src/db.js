@@ -197,9 +197,9 @@ try {
 const userCount = db.prepare('SELECT COUNT(1) as c FROM users').get().c;
 if (userCount === 0) {
   const insert = db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)');
-  const adminPass = bcrypt.hashSync('adminpass', 10);
-  const stockPass = bcrypt.hashSync('stockpass', 10);
-  insert.run('admin', adminPass, 'admin');
+  const adminPass = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'adminpass', 10);
+  const stockPass = bcrypt.hashSync(process.env.STOCK_MANAGER_PASSWORD || 'stockpass', 10);
+  insert.run(process.env.ADMIN_USERNAME || 'admin', adminPass, 'admin');
   insert.run('stockmgr', stockPass, 'stock_manager');
 }
 

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-shell">
+    <header class="admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin">Products</a>
+        <a href="/admin/offers">Offers</a>
+        <a href="/admin/recurring">Recurring</a>
+        <a href="/admin/settings">Settings</a>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-hero">
+        <div>
+          <h1><%= title %></h1>
+          <p>Keep names, categories, prices, and stock levels polished for the storefront.</p>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <% const imageValues = product && product.images ? product.images : []; %>
+        <% const formAction = `${action}${action.includes('?') ? '&' : '?'}_csrf=${encodeURIComponent(csrfToken)}`; %>
+        <form class="admin-form" method="post" action="<%= formAction %>" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="admin-form-grid">
+            <label class="field">Name
+              <input name="name" value="<%= product ? product.name : '' %>" />
+            </label>
+            <label class="field">Category
+              <input name="category" value="<%= product ? product.category : '' %>" />
+            </label>
+            <label class="field">Price (Rs)
+              <input name="price" value="<%= product ? product.price : '' %>" />
+            </label>
+            <label class="field">Stock
+              <input name="stock" value="<%= product ? product.stock : '' %>" />
+            </label>
+          </div>
+          <label class="field">Description
+            <textarea name="description" rows="5"><%= product ? product.description : '' %></textarea>
+          </label>
+          <div class="product-image-fields">
+            <h2>Product Pictures</h2>
+            <div class="admin-upload-grid">
+              <% [1, 2, 3, 4].forEach(function(slot){ const image = imageValues[slot - 1] || ''; %>
+                <label class="field image-upload-slot">Picture <%= slot %>
+                  <span class="upload-preview <%= image ? '' : 'empty' %>" <% if (image) { %>style="--product-image: url('<%- image %>')"<% } %>>
+                    <% if (!image) { %>No image<% } %>
+                  </span>
+                  <input type="hidden" name="existing_image_<%= slot %>" value="<%= image %>" />
+                  <input name="image_<%= slot %>_file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
+                </label>
+              <% }) %>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="button button-dark" type="submit">Save product</button>
+            <a class="button button-light" href="/admin">Cancel</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

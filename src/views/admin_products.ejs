@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-shell">
+    <header class="admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin">Products</a>
+        <a href="/admin/offers">Offers</a>
+        <a href="/admin/recurring">Recurring</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/">Storefront</a>
+      </nav>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button-light" type="submit">Log out</button>
+      </form>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-hero">
+        <div>
+          <h1>Product Command Center</h1>
+          <p>Track catalog availability, pricing, and offer readiness from one clean workspace.</p>
+        </div>
+        <a class="button button-dark" href="/admin/products/new">Create product</a>
+      </section>
+
+      <section class="metric-grid" aria-label="Catalog metrics">
+        <div class="metric-card">
+          <span>Total products</span>
+          <strong><%= stats.products %></strong>
+        </div>
+        <div class="metric-card">
+          <span>Units in stock</span>
+          <strong><%= stats.stock %></strong>
+        </div>
+        <div class="metric-card">
+          <span>Active offers</span>
+          <strong><%= stats.offers %></strong>
+        </div>
+        <div class="metric-card">
+          <span>Open orders</span>
+          <strong><%= stats.orders %></strong>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-header">
+          <h2>Inventory</h2>
+          <a class="text-link" href="/products">JSON feed</a>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Photos</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <% products.forEach(function(p){ %>
+              <tr>
+                <td>#<%= p.id %></td>
+                <td><strong><%= p.name %></strong></td>
+                <td><%= p.category %></td>
+                <td><%= formatRupees(p.price) %></td>
+                <td><span class="status-pill"><%= p.stock %> units</span></td>
+                <td>
+                  <div class="admin-photo-strip" aria-label="<%= p.images.length %> product photos">
+                    <% p.images.forEach(function(image){ %>
+                      <span class="admin-photo-thumb" style="--product-image: url('<%- image %>')"></span>
+                    <% }) %>
+                    <span class="photo-count"><%= p.images.length %>/4</span>
+                  </div>
+                </td>
+                <td><a class="text-link" href="/admin/products/<%= p.id %>/edit">Edit</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "fancystore",
+  "version": "0.1.0",
+  "description": "API for The Golden Crown managing jewellery, cosmetics, gifts, ornaments, and premium styles",
+  "main": "src/index.js",
+  "engines": {
+    "node": "20.x"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "mocha --exit",
+    "process-recurring": "node scripts/process_recurring.js",
+    "start-cron": "node scripts/run_recurring_cron.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.10.0",
+    "cookie-parser": "^1.4.7",
+    "csurf": "^1.11.0",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "express-validator": "^6.15.0",
+    "formidable": "^2.1.5",
+    "jsonwebtoken": "^9.0.0",
+    "node-cron": "^3.0.2",
+    "nodemailer": "^6.9.3"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}

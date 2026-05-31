@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-shell">
+    <header class="admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin">Products</a>
+        <a href="/admin/offers">Offers</a>
+        <a href="/admin/recurring">Recurring</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/">Storefront</a>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-hero">
+        <div>
+          <h1>Offer Studio</h1>
+          <p>Create precise promotions for seasonal moments, fast-moving categories, and loyalty pushes.</p>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-header">
+          <h2>Create offer</h2>
+        </div>
+        <form class="admin-form" method="post" action="/admin/offers">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="admin-form-grid">
+            <label class="field">Product
+              <select name="product_id">
+                <% products.forEach(p => { %>
+                  <option value="<%= p.id %>"><%= p.name %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label class="field">Type
+              <select name="type">
+                <option value="bogo">BOGO</option>
+                <option value="percent">Percent</option>
+                <option value="hot_hour">Hot Hour</option>
+              </select>
+            </label>
+            <label class="field">Buy
+              <input name="buy" />
+            </label>
+            <label class="field">Free
+              <input name="free" />
+            </label>
+            <label class="field">Percent
+              <input name="percent" />
+            </label>
+            <label class="field">Hour (0-23)
+              <input name="hour" />
+            </label>
+            <label class="field">Starts at (ISO)
+              <input name="starts_at" />
+            </label>
+            <label class="field">Ends at (ISO)
+              <input name="ends_at" />
+            </label>
+          </div>
+          <button class="button button-dark" type="submit">Create offer</button>
+        </form>
+      </section>
+
+      <section class="admin-panel" style="margin-top: 22px;">
+        <div class="panel-header">
+          <h2>Existing offers</h2>
+        </div>
+        <table class="admin-table">
+          <thead>
+            <tr><th>ID</th><th>Product</th><th>Type</th><th>Parameters</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <% offers.forEach(o => { %>
+              <tr>
+                <td>#<%= o.id %></td>
+                <td><strong><%= o.product_name %></strong></td>
+                <td><span class="status-pill"><%= o.type %></span></td>
+                <td>Buy <%= o.buy %>, free <%= o.free %>, percent <%= o.percent %>, hour <%= o.hour || '-' %></td>
+                <td>
+                  <form method="post" action="/admin/offers/<%= o.id %>/delete">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="button danger-button" type="submit">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

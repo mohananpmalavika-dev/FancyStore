@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/#offers">Offers</a>
+        <a href="/contact">Contact</a>
+        <a href="/testimonials">Testimonials</a>
+        <a href="/account">My store</a>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <% if (currentUser) { %>
+          <form method="post" action="/logout">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-light" type="submit">Log out</button>
+          </form>
+        <% } else { %>
+          <a class="button button-light" href="/login?next=/shop">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="shop-page">
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+
+      <section class="shop-toolbar">
+        <div>
+          <h1>Shop The Golden Crown</h1>
+          <p>Choose products, save favorites, add to bag, and checkout for shop delivery.</p>
+        </div>
+        <form class="shop-search" method="get" action="/shop">
+          <input name="q" value="<%= q %>" placeholder="Search product or category" aria-label="Search products" />
+          <% if (selectedCategory) { %>
+            <input type="hidden" name="category" value="<%= selectedCategory %>" />
+          <% } %>
+          <button class="button button-dark" type="submit">Search</button>
+        </form>
+      </section>
+
+      <section class="category-tabs" aria-label="Category filters">
+        <a class="<%= selectedCategory ? '' : 'active' %>" href="/shop">All</a>
+        <% categories.forEach(category => { %>
+          <a class="<%= selectedCategory === category.category ? 'active' : '' %>" href="/shop?category=<%= encodeURIComponent(category.category || '') %>"><%= category.displayCategory %></a>
+        <% }) %>
+      </section>
+
+      <% if (!products.length) { %>
+        <section class="empty-state">
+          <h2>No products found</h2>
+          <p>Try another search or category.</p>
+          <a class="button button-dark" href="/shop">Reset shop</a>
+        </section>
+      <% } else { %>
+        <section class="product-grid shop-grid" aria-label="Products">
+          <% products.forEach(product => { %>
+            <article class="product-card" id="product-<%= product.id %>">
+              <div class="product-media">
+                <div class="product-image" style="--product-image: url('<%- product.image %>')"></div>
+                <% if (product.images && product.images.length > 1) { %>
+                  <div class="product-thumbs" aria-label="More photos of <%= product.name %>">
+                    <% product.images.forEach(image => { %>
+                      <span class="product-thumb" style="--product-image: url('<%- image %>')"></span>
+                    <% }) %>
+                  </div>
+                <% } %>
+              </div>
+              <div class="product-body">
+                <p class="product-category"><%= product.displayCategory %></p>
+                <h2><%= product.name %></h2>
+                <p><%= product.description %></p>
+                <% if (product.offerLabels.length) { %>
+                  <div class="offer-tags">
+                    <% product.offerLabels.forEach(label => { %>
+                      <span><%= label %></span>
+                    <% }) %>
+                  </div>
+                <% } %>
+                <div class="product-meta">
+                  <strong><%= formatRupees(product.price) %></strong>
+                  <span><%= product.stock %> in stock</span>
+                </div>
+                <div class="card-actions">
+                  <form class="inline-buy" method="post" action="/shop/cart-items">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="product_id" value="<%= product.id %>" />
+                    <input type="hidden" name="redirect_to" value="/shop#product-<%= product.id %>" />
+                    <input class="qty-input" name="quantity" type="number" min="1" max="<%= product.stock %>" value="1" aria-label="Quantity for <%= product.name %>" />
+                    <button class="button button-dark" type="submit">Add</button>
+                  </form>
+                  <form method="post" action="/favorites/<%= product.id %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="redirect_to" value="/shop#product-<%= product.id %>" />
+                    <button class="button button-light" type="submit">Favorite</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </section>
+      <% } %>
+    </main>
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/#offers">Offers</a>
+        <a href="/#delivery">Delivery</a>
+        <a href="/contact">Contact</a>
+        <a href="/testimonials">Testimonials</a>
+        <% if (currentUser) { %>
+          <a href="/account">My store</a>
+        <% } %>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <% if (currentUser) { %>
+          <form method="post" action="/logout">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-light" type="submit">Log out</button>
+          </form>
+        <% } else { %>
+          <a class="button button-light" href="/login">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+    <main>
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+
+      <section class="commerce-hero">
+        <div class="hero-copy">
+          <h1>The Golden Crown</h1>
+          <p class="hero-lede">Order fine jewellery, cosmetics, gifts, ornaments, and premium styles from the local shop. The shopkeeper packs your order and sends it to your address.</p>
+          <form class="hero-search" method="get" action="/shop">
+            <input name="q" placeholder="Search dresses, gifts, toys..." aria-label="Search products" />
+            <button class="button button-dark" type="submit">Search</button>
+          </form>
+          <div class="hero-actions">
+            <a class="button button-dark" href="/shop">Shop products</a>
+            <a class="button button-outline" href="/register">Create account</a>
+          </div>
+        </div>
+
+        <% if (featured) { %>
+          <article class="hero-featured" aria-label="Featured product">
+            <div class="hero-featured-image" style="--product-image: url('<%- featured.image %>')"></div>
+            <% if (featured.images && featured.images.length > 1) { %>
+              <div class="hero-thumb-strip" aria-label="More photos of <%= featured.name %>">
+                <% featured.images.forEach(image => { %>
+                  <span class="product-thumb" style="--product-image: url('<%- image %>')"></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <div class="hero-featured-body">
+              <p class="product-category"><%= featured.displayCategory %></p>
+              <h2><%= featured.name %></h2>
+              <p><%= featured.description %></p>
+              <div class="product-meta">
+                <strong><%= formatRupees(featured.price) %></strong>
+                <span><%= featured.stock %> available</span>
+              </div>
+              <% if (featured.offerLabels.length) { %>
+                <div class="offer-tags">
+                  <% featured.offerLabels.forEach(label => { %>
+                    <span><%= label %></span>
+                  <% }) %>
+                </div>
+              <% } %>
+              <form class="buy-row" method="post" action="/shop/cart-items">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <input type="hidden" name="product_id" value="<%= featured.id %>" />
+                <input type="hidden" name="redirect_to" value="/" />
+                <input class="qty-input" name="quantity" type="number" min="1" max="<%= featured.stock %>" value="1" aria-label="Quantity" />
+                <button class="button button-dark" type="submit">Add to bag</button>
+              </form>
+            </div>
+          </article>
+        <% } %>
+      </section>
+
+      <section class="category-rail" aria-label="Shop by category">
+        <% categories.forEach(category => { %>
+          <a class="category-tile" href="/shop?category=<%= encodeURIComponent(category.category || '') %>" style="--tile-image: url('<%- category.image %>')">
+            <span><%= category.displayCategory %></span>
+            <small><%= category.count %> products</small>
+          </a>
+        <% }) %>
+      </section>
+
+      <section class="section" id="collection">
+        <div class="section-heading">
+          <div>
+            <h2>Ready To Order</h2>
+            <p>Live stock, customer accounts, favorites, offers, delivery checkout, and order tracking are connected to this storefront.</p>
+          </div>
+          <a class="text-link" href="/shop">View all products</a>
+        </div>
+
+        <div class="product-grid">
+          <% products.forEach(product => { %>
+            <article class="product-card" id="product-<%= product.id %>">
+              <div class="product-media">
+                <a class="product-image" href="/shop" style="--product-image: url('<%- product.image %>')" aria-label="<%= product.name %>"></a>
+                <% if (product.images && product.images.length > 1) { %>
+                  <div class="product-thumbs" aria-label="More photos of <%= product.name %>">
+                    <% product.images.forEach(image => { %>
+                      <span class="product-thumb" style="--product-image: url('<%- image %>')"></span>
+                    <% }) %>
+                  </div>
+                <% } %>
+              </div>
+              <div class="product-body">
+                <p class="product-category"><%= product.displayCategory %></p>
+                <h3><%= product.name %></h3>
+                <p><%= product.description %></p>
+                <% if (product.offerLabels.length) { %>
+                  <div class="offer-tags">
+                    <% product.offerLabels.forEach(label => { %>
+                      <span><%= label %></span>
+                    <% }) %>
+                  </div>
+                <% } %>
+                <div class="product-meta">
+                  <strong><%= formatRupees(product.price) %></strong>
+                  <span><%= product.stock %> in stock</span>
+                </div>
+                <div class="card-actions">
+                  <form method="post" action="/shop/cart-items">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="product_id" value="<%= product.id %>" />
+                    <input type="hidden" name="redirect_to" value="/#product-<%= product.id %>" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button class="button button-dark" type="submit">Add</button>
+                  </form>
+                  <form method="post" action="/favorites/<%= product.id %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <input type="hidden" name="redirect_to" value="/#product-<%= product.id %>" />
+                    <button class="button button-light" type="submit">Favorite</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="delivery-band" id="delivery">
+        <div>
+          <h2>Order online. Receive from the shop.</h2>
+          <p>Customers place an order with Gmail/email login, choose delivery details, and the shopkeeper handles packing, status updates, and dispatch from the admin order desk.</p>
+        </div>
+        <div class="service-list">
+          <div>
+            <span>01</span>
+            <strong>Customer login</strong>
+            <p>Gmail/email and password accounts protect carts, orders, favorites, and event reminders.</p>
+          </div>
+          <div>
+            <span>02</span>
+            <strong>Delivery checkout</strong>
+            <p>Address, phone, preferred date, notes, totals, discounts, and stock checks are saved with the order.</p>
+          </div>
+          <div>
+            <span>03</span>
+            <strong>Shopkeeper dispatch</strong>
+            <p>Admin can accept, pack, send, deliver, or cancel each order from one fulfillment table.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section offers-section" id="offers">
+        <div class="section-heading">
+          <div>
+            <h2>Store Offers</h2>
+            <p>Promotions published by the admin appear directly beside products while customers shop.</p>
+          </div>
+          <a class="button button-dark" href="/shop">Shop offers</a>
+        </div>
+
+        <div class="offer-grid">
+          <% if (offers.length) { %>
+            <% offers.forEach(offer => { %>
+              <article class="offer-card">
+                <span><%= offer.type.replace('_', ' ').toUpperCase() %></span>
+                <h3><%= offer.product_name || 'Storewide offer' %></h3>
+                <p>
+                  <% if (offer.type === 'percent') { %>
+                    <%= offer.percent %>% off selected products.
+                  <% } else if (offer.type === 'bogo') { %>
+                    Buy <%= offer.buy %>, get <%= offer.free %> free.
+                  <% } else { %>
+                    Hot-hour pricing at <%= offer.hour %>:00.
+                  <% } %>
+                </p>
+              </article>
+            <% }) %>
+          <% } else { %>
+            <article class="offer-card">
+              <span>READY</span>
+              <h3>Create your first promotion</h3>
+              <p>Use the admin offer studio to publish BOGO, percent-off, or hot-hour campaigns.</p>
+            </article>
+          <% } %>
+        </div>
+      </section>
+    </main>
+
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

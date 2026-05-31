@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/#offers">Offers</a>
+        <a href="/contact">Contact</a>
+        <a href="/testimonials">Testimonials</a>
+        <% if (currentUser) { %>
+          <a href="/account">My store</a>
+        <% } %>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <% if (currentUser) { %>
+          <form method="post" action="/logout">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-light" type="submit">Log out</button>
+          </form>
+        <% } else { %>
+          <a class="button button-light" href="/login?next=/contact">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="contact-page">
+      <section class="shop-toolbar">
+        <div>
+          <h1>Contact Us</h1>
+          <p>Send your details and message to The Golden Crown team.</p>
+        </div>
+        <% if (storeProfile && storeProfile.whatsappUrl) { %>
+          <a class="button button-dark" href="<%= storeProfile.whatsappUrl %>" target="_blank" rel="noopener">WhatsApp us</a>
+        <% } %>
+      </section>
+
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <section class="contact-layout">
+        <form class="admin-panel contact-form" method="post" action="/contact">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <label class="field">Name
+            <input name="name" value="<%= values.name || '' %>" required />
+          </label>
+          <div class="two-fields">
+            <label class="field">Email
+              <input name="email" type="email" value="<%= values.email || '' %>" />
+            </label>
+            <label class="field">Phone
+              <input name="phone" value="<%= values.phone || '' %>" />
+            </label>
+          </div>
+          <label class="field">Message
+            <textarea name="message" rows="7" required><%= values.message || '' %></textarea>
+          </label>
+          <button class="button button-dark" type="submit">Send message</button>
+        </form>
+
+        <aside class="admin-panel contact-card">
+          <h2>Store Contact</h2>
+          <% if (storeProfile && storeProfile.address) { %>
+            <p><strong>Address</strong><span><%= storeProfile.address %></span></p>
+          <% } %>
+          <% if (storeProfile && storeProfile.email) { %>
+            <p><strong>Email</strong><a href="mailto:<%= storeProfile.email %>"><%= storeProfile.email %></a></p>
+          <% } %>
+          <% if (storeProfile && storeProfile.phone) { %>
+            <p><strong>WhatsApp</strong><a href="<%= storeProfile.whatsappUrl %>" target="_blank" rel="noopener"><%= storeProfile.phone %></a></p>
+          <% } %>
+        </aside>
+      </section>
+    </main>
+
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+<footer class="site-footer">
+  <div>
+    <strong>The Golden Crown</strong>
+    <p>Fine jewellery, cosmetics, and gifts with online ordering.</p>
+  </div>
+  <address class="store-contact">
+    <% if (storeProfile && storeProfile.address) { %>
+      <span><%= storeProfile.address %></span>
+    <% } %>
+    <% if (storeProfile && storeProfile.email) { %>
+      <a href="mailto:<%= storeProfile.email %>"><%= storeProfile.email %></a>
+    <% } %>
+    <% if (storeProfile && storeProfile.phone) { %>
+      <a href="<%= storeProfile.whatsappUrl || ('tel:' + storeProfile.phone.replace(/[^0-9+]/g, '')) %>" target="_blank" rel="noopener">WhatsApp: <%= storeProfile.phone %></a>
+    <% } %>
+  </address>
+  <nav class="footer-links" aria-label="Store links">
+    <a href="/contact">Contact us</a>
+    <a href="/feedback">Feedback</a>
+    <a href="/testimonials">Testimonials</a>
+    <a href="/admin/login">Shopkeeper admin</a>
+  </nav>
+</footer>

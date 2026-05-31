@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-shell">
+    <header class="admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin">Products</a>
+        <a href="/admin/offers">Offers</a>
+        <a href="/admin/recurring">Recurring</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/">Storefront</a>
+      </nav>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button-light" type="submit">Log out</button>
+      </form>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-hero">
+        <div>
+          <h1>Store Settings</h1>
+          <p>Update the address, email, and contact number customers see on the storefront.</p>
+        </div>
+      </section>
+
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <section class="admin-panel">
+        <form class="admin-form" method="post" action="/admin/settings">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <label class="field">Store address
+            <textarea name="address" rows="4"><%= profile.address || '' %></textarea>
+          </label>
+          <div class="admin-form-grid">
+            <label class="field">Email
+              <input name="email" type="email" value="<%= profile.email || '' %>" />
+            </label>
+            <label class="field">Contact number
+              <input name="phone" value="<%= profile.phone || '' %>" />
+            </label>
+          </div>
+          <label class="field">UPI ID for customer payments
+            <input name="upi_id" value="<%= profile.upi_id || '' %>" placeholder="store@upi" />
+          </label>
+          <div class="form-actions">
+            <button class="button button-dark" type="submit">Save settings</button>
+            <a class="button button-light" href="/">View storefront</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

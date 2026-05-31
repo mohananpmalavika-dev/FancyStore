@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/testimonials">Testimonials</a>
+        <a href="/account">My store</a>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <form method="post" action="/logout">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button class="button button-light" type="submit">Log out</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="order-page">
+      <section class="order-confirmation">
+        <span class="status-pill"><%= (order.status || 'new').replaceAll('_', ' ') %></span>
+        <h1>Order #<%= order.id %> received</h1>
+        <p>The shopkeeper can now accept, pack, and send this order from the admin order desk.</p>
+        <div class="order-actions">
+          <a class="button button-dark" href="/shop">Continue shopping</a>
+          <a class="button button-light" href="/account">View my store</a>
+        </div>
+      </section>
+
+      <section class="checkout-layout">
+        <div class="admin-panel order-details-panel">
+          <div class="panel-header">
+            <h2>Products</h2>
+          </div>
+          <% order.items.forEach(item => { %>
+            <article class="bag-item compact">
+              <div class="bag-item-image" style="--product-image: url('<%- item.image %>')"></div>
+              <div>
+                <p class="product-category"><%= item.displayCategory %></p>
+                <h2><%= item.product_name %></h2>
+                <p><%= item.quantity %> x <%= formatRupees(item.price) %></p>
+              </div>
+              <strong><%= formatRupees(item.line_total) %></strong>
+            </article>
+          <% }) %>
+        </div>
+
+        <aside class="checkout-panel">
+          <h2>Delivery</h2>
+          <dl class="total-list">
+            <div><dt>Name</dt><dd><%= order.customer_name %></dd></div>
+            <div><dt>Email</dt><dd><%= order.customer_email %></dd></div>
+            <div><dt>Phone</dt><dd><%= order.customer_phone %></dd></div>
+            <div><dt>Address</dt><dd><%= order.delivery_address %></dd></div>
+            <div><dt>City</dt><dd><%= order.delivery_city %></dd></div>
+            <div><dt>Pincode</dt><dd><%= order.delivery_pincode %></dd></div>
+            <% if (order.delivery_date) { %>
+              <div><dt>Date</dt><dd><%= order.delivery_date %></dd></div>
+            <% } %>
+            <div><dt>Payment</dt><dd><%= (order.payment_method || 'pay_on_delivery').replaceAll('_', ' ') %></dd></div>
+            <% if (order.payment_utr) { %>
+              <div><dt>UPI UTR</dt><dd><%= order.payment_utr %></dd></div>
+            <% } %>
+            <div class="grand-total"><dt>Total</dt><dd><%= formatRupees(order.total) %></dd></div>
+          </dl>
+        </aside>
+      </section>
+    </main>
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

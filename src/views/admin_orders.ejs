@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="admin-shell">
+    <header class="admin-topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="/admin/orders">Orders</a>
+        <a href="/admin">Products</a>
+        <a href="/admin/offers">Offers</a>
+        <a href="/admin/recurring">Recurring</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/">Storefront</a>
+      </nav>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button-light" type="submit">Log out</button>
+      </form>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-hero">
+        <div>
+          <h1>Order Desk</h1>
+          <p>Accept, pack, send, deliver, or cancel customer orders placed from the storefront.</p>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Order metrics">
+        <div class="metric-card">
+          <span>New orders</span>
+          <strong><%= stats.newOrders %></strong>
+        </div>
+        <div class="metric-card">
+          <span>Active deliveries</span>
+          <strong><%= stats.activeOrders %></strong>
+        </div>
+        <div class="metric-card">
+          <span>Delivered</span>
+          <strong><%= stats.delivered %></strong>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-header">
+          <h2>Customer orders</h2>
+        </div>
+        <table class="admin-table orders-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Delivery</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!orders.length) { %>
+              <tr>
+                <td colspan="6">No customer orders yet.</td>
+              </tr>
+            <% } %>
+            <% orders.forEach(order => { %>
+              <tr>
+                <td>
+                  <strong>#<%= order.id %></strong>
+                  <span class="table-subtext"><%= order.created_at %></span>
+                </td>
+                <td>
+                  <strong><%= order.customer_name || order.username %></strong>
+                  <span class="table-subtext"><%= order.customer_phone || 'No phone' %></span>
+                  <span class="table-subtext"><%= order.customer_email || '' %></span>
+                </td>
+                <td><%= order.item_summary || 'No items' %></td>
+                <td>
+                  <strong><%= order.delivery_city || 'Delivery' %></strong>
+                  <span class="table-subtext"><%= order.delivery_address || '' %></span>
+                  <% if (order.delivery_date) { %>
+                    <span class="table-subtext">Preferred: <%= order.delivery_date %></span>
+                  <% } %>
+                </td>
+                <td>
+                  <strong><%= formatRupees(order.total) %></strong>
+                  <span class="table-subtext"><%= (order.payment_method || 'pay_on_delivery').replaceAll('_', ' ') %></span>
+                  <% if (order.payment_utr) { %>
+                    <span class="table-subtext">UTR: <%= order.payment_utr %></span>
+                  <% } %>
+                </td>
+                <td>
+                  <form class="status-form" method="post" action="/admin/orders/<%= order.id %>/status">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <select name="status">
+                      <% orderStatuses.forEach(status => { %>
+                        <option value="<%= status %>" <%= (order.status || 'new') === status ? 'selected' : '' %>><%= status.replaceAll('_', ' ') %></option>
+                      <% }) %>
+                    </select>
+                    <button class="button button-light" type="submit">Save</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

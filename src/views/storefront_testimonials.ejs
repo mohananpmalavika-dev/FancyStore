@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/testimonials">Testimonials</a>
+        <% if (currentUser) { %>
+          <a href="/account">My store</a>
+        <% } %>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <% if (currentUser) { %>
+          <form method="post" action="/logout">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-light" type="submit">Log out</button>
+          </form>
+        <% } else { %>
+          <a class="button button-light" href="/login?next=/testimonials">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="contact-page">
+      <section class="shop-toolbar">
+        <div>
+          <h1>Testimonials</h1>
+          <p>What customers say about shopping with The Golden Crown.</p>
+        </div>
+        <a class="button button-dark" href="/feedback">Share feedback</a>
+      </section>
+
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+
+      <% if (!testimonials.length) { %>
+        <section class="empty-state">
+          <h2>No testimonials yet</h2>
+          <p>Be the first to share your experience.</p>
+          <a class="button button-dark" href="/feedback">Write feedback</a>
+        </section>
+      <% } else { %>
+        <section class="testimonial-grid" aria-label="Customer testimonials">
+          <% testimonials.forEach(item => { %>
+            <article class="testimonial-card">
+              <div class="rating-stars" aria-label="<%= item.rating %> out of 5 stars">Rating <%= item.rating %>/5</div>
+              <p><%= item.message %></p>
+              <strong><%= item.name %></strong>
+            </article>
+          <% }) %>
+        </section>
+      <% } %>
+    </main>
+
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

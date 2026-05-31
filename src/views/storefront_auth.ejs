@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="customer-auth-page">
+      <section class="customer-auth-art">
+        <a class="brand" href="/">
+          <span class="brand-mark brand-logo" aria-hidden="true"></span>
+          <span>The Golden Crown</span>
+        </a>
+        <h1><%= mode === 'login' ? 'Welcome back.' : 'Create your store account.' %></h1>
+        <p>Use your Gmail/email and password to shop, track orders, save favorites, and plan special deliveries.</p>
+      </section>
+      <section class="customer-auth-panel">
+        <div class="login-card">
+          <h2><%= mode === 'login' ? 'Customer login' : 'Customer signup' %></h2>
+          <% if (error) { %>
+            <p class="error"><%= error %></p>
+          <% } %>
+
+          <% if (mode === 'login') { %>
+            <form method="post" action="/login">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="next" value="<%= next %>" />
+              <label class="field" for="login">Gmail or email
+                <input id="login" name="login" type="email" autocomplete="email" required />
+              </label>
+              <label class="field" for="password">Password
+                <input id="password" name="password" type="password" autocomplete="current-password" required />
+              </label>
+              <button class="button button-dark" type="submit">Log in</button>
+            </form>
+            <p class="auth-switch">New customer? <a href="/register?next=<%= encodeURIComponent(next) %>">Create an account</a></p>
+          <% } else { %>
+            <form method="post" action="/register">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="next" value="<%= next %>" />
+              <label class="field" for="name">Name
+                <input id="name" name="name" autocomplete="name" required />
+              </label>
+              <label class="field" for="email">Gmail or email
+                <input id="email" name="email" type="email" autocomplete="email" required />
+              </label>
+              <label class="field" for="password">Password
+                <input id="password" name="password" type="password" autocomplete="new-password" minlength="6" required />
+              </label>
+              <button class="button button-dark" type="submit">Create account</button>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="/login?next=<%= encodeURIComponent(next) %>">Log in</a></p>
+          <% } %>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

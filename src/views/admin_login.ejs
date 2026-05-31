@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="login-page">
+      <section class="login-art">
+        <a class="brand" href="/">
+          <span class="brand-mark brand-logo" aria-hidden="true"></span>
+          <span>The Golden Crown</span>
+        </a>
+        <h1>Run the store with confidence.</h1>
+        <p>Manage product inventory, offers, and scheduled customer moments from a polished retail console.</p>
+      </section>
+      <section class="login-panel">
+        <div class="login-card">
+          <h2>Admin login</h2>
+          <p>Use the seeded administrator account to preview the console.</p>
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+      <form method="post" action="/admin/login">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <label class="field" for="username">Username
+              <input id="username" name="username" autocomplete="username" value="admin" />
+            </label>
+
+            <label class="field" for="password">Password
+              <input id="password" name="password" type="password" autocomplete="current-password" />
+            </label>
+
+            <button class="button button-dark" type="submit">Log in</button>
+      </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

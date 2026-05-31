@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/testimonials">Testimonials</a>
+        <% if (currentUser) { %>
+          <a href="/account">My store</a>
+        <% } %>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <% if (currentUser) { %>
+          <form method="post" action="/logout">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <button class="button button-light" type="submit">Log out</button>
+          </form>
+        <% } else { %>
+          <a class="button button-light" href="/login?next=/feedback">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+    <main class="contact-page">
+      <section class="shop-toolbar">
+        <div>
+          <h1>Feedback</h1>
+          <p>Share your shopping experience and help future customers choose with confidence.</p>
+        </div>
+        <a class="button button-light" href="/testimonials">Read testimonials</a>
+      </section>
+
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <section class="admin-panel feedback-panel">
+        <form class="contact-form" method="post" action="/feedback">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="two-fields">
+            <label class="field">Name
+              <input name="name" value="<%= values.name || '' %>" required />
+            </label>
+            <label class="field">Email
+              <input name="email" type="email" value="<%= values.email || '' %>" />
+            </label>
+          </div>
+          <label class="field">Rating
+            <select name="rating">
+              <% [5, 4, 3, 2, 1].forEach(rating => { %>
+                <option value="<%= rating %>" <%= Number(values.rating || 5) === rating ? 'selected' : '' %>><%= rating %> stars</option>
+              <% }) %>
+            </select>
+          </label>
+          <label class="field">Feedback
+            <textarea name="message" rows="7" required><%= values.message || '' %></textarea>
+          </label>
+          <label class="check-field">
+            <input type="checkbox" name="display_as_testimonial" value="1" <%= values.display_as_testimonial ? 'checked' : '' %> />
+            <span>Show my feedback on the testimonials page</span>
+          </label>
+          <button class="button button-dark" type="submit">Submit feedback</button>
+        </form>
+      </section>
+    </main>
+
+    <%- include('partials/site_footer') %>
+  </body>
+</html>

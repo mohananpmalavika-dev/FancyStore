@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="site">
+    <header class="store-header">
+      <a class="brand" href="/">
+        <span class="brand-mark brand-logo" aria-hidden="true"></span>
+        <span>The Golden Crown</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/testimonials">Testimonials</a>
+        <a href="/account">My store</a>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-link" href="/bag" aria-label="Shopping bag">
+          <span>Bag</span>
+          <strong><%= cartCount %></strong>
+        </a>
+        <form method="post" action="/logout">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button class="button button-light" type="submit">Log out</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="bag-page">
+      <section class="bag-heading">
+        <div>
+          <h1>Your bag</h1>
+          <p>Review products, schedule delivery, or place the order for shopkeeper dispatch.</p>
+        </div>
+        <a class="button button-light" href="/shop">Keep shopping</a>
+      </section>
+
+      <% if (notice) { %>
+        <p class="notice-bar"><%= notice %></p>
+      <% } %>
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <% if (!items.length) { %>
+        <section class="empty-state">
+          <h2>Your bag is empty</h2>
+          <p>Add products from the shop to start an order.</p>
+          <a class="button button-dark" href="/shop">Shop products</a>
+        </section>
+      <% } else { %>
+        <section class="checkout-layout">
+          <div class="bag-list">
+            <% items.forEach(item => { %>
+              <article class="bag-item">
+                <div class="bag-item-image" style="--product-image: url('<%- item.image %>')"></div>
+                <div>
+                  <p class="product-category"><%= item.displayCategory %></p>
+                  <h2><%= item.name %></h2>
+                  <p><%= item.offerLabel || 'Standard price' %></p>
+                </div>
+                <form class="quantity-form" method="post" action="/bag/items/<%= item.cart_item_id %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <input class="qty-input" name="quantity" type="number" min="0" max="<%= item.stock %>" value="<%= item.quantity %>" aria-label="Quantity for <%= item.name %>" />
+                  <button class="button button-light" type="submit">Update</button>
+                </form>
+                <strong><%= formatRupees(item.lineTotal) %></strong>
+              </article>
+            <% }) %>
+
+            <form method="post" action="/bag/clear">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <button class="button danger-button" type="submit">Clear bag</button>
+            </form>
+          </div>
+
+          <aside class="checkout-panel">
+            <h2>Order summary</h2>
+            <dl class="total-list">
+              <div><dt>Subtotal</dt><dd><%= formatRupees(totals.subtotal) %></dd></div>
+              <div><dt>Discount</dt><dd>-<%= formatRupees(totals.discount) %></dd></div>
+              <div><dt>Delivery</dt><dd><%= formatRupees(totals.deliveryFee) %></dd></div>
+              <div class="grand-total"><dt>Total</dt><dd><%= formatRupees(totals.total) %></dd></div>
+            </dl>
+
+            <form class="checkout-form" method="post" action="/bag/checkout">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <label class="field">Name
+                <input name="customer_name" value="<%= currentUser.username %>" required />
+              </label>
+              <label class="field">Gmail or email
+                <input name="customer_email" type="email" value="<%= currentUser.email || '' %>" required />
+              </label>
+              <label class="field">Phone
+                <input name="customer_phone" required />
+              </label>
+              <label class="field">Delivery address
+                <textarea name="delivery_address" rows="3" required></textarea>
+              </label>
+              <div class="two-fields">
+                <label class="field">City
+                  <input name="delivery_city" required />
+                </label>
+                <label class="field">Pincode
+                  <input name="delivery_pincode" required />
+                </label>
+              </div>
+              <div class="two-fields">
+                <label class="field">Preferred date
+                  <input name="delivery_date" type="date" />
+                </label>
+                <label class="field">Payment
+                  <select name="payment_method" data-payment-method>
+                    <option value="pay_on_delivery">Pay on delivery</option>
+                    <option value="upi">UPI</option>
+                    <option value="shop_contact">Shop will contact</option>
+                  </select>
+                </label>
+              </div>
+              <div class="upi-payment-box" data-upi-payment hidden>
+                <% if (storeProfile && storeProfile.upi_id) { %>
+                  <p>Pay to <strong><%= storeProfile.upi_id %></strong></p>
+                <% } else { %>
+                  <p>The shop has not added a UPI ID yet.</p>
+                <% } %>
+                <label class="field">UPI UTR
+                  <input name="payment_utr" maxlength="80" autocomplete="off" placeholder="Enter UTR after payment" data-payment-utr />
+                </label>
+              </div>
+              <label class="field">Delivery note
+                <textarea name="delivery_note" rows="2"></textarea>
+              </label>
+              <button class="button button-dark" type="submit">Place order</button>
+            </form>
+          </aside>
+        </section>
+
+        <section class="planning-grid">
+          <form class="planning-card" method="post" action="/bag/scheduled">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <h2>Schedule this bag</h2>
+            <label class="field">Delivery date
+              <input name="delivery_date" type="date" required />
+            </label>
+            <label class="field">Delivery type
+              <select name="delivery_type">
+                <option value="standard">Standard</option>
+                <option value="same_day">Same day</option>
+                <option value="special_event">Special event</option>
+              </select>
+            </label>
+            <label class="field">Note
+              <input name="description" placeholder="Birthday gift, festival order..." />
+            </label>
+            <button class="button button-light" type="submit">Save schedule</button>
+          </form>
+
+          <form class="planning-card" method="post" action="/bag/recurring">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <h2>Repeat this bag</h2>
+            <label class="field">Interval
+              <select name="interval">
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="bimonthly">Every two months</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="halfyearly">Half yearly</option>
+              </select>
+            </label>
+            <label class="field">Next run
+              <input name="next_run" type="date" required />
+            </label>
+            <button class="button button-light" type="submit">Save repeat order</button>
+          </form>
+        </section>
+      <% } %>
+    </main>
+    <%- include('partials/site_footer') %>
+    <script>
+      const paymentMethod = document.querySelector('[data-payment-method]');
+      const upiPayment = document.querySelector('[data-upi-payment]');
+      const paymentUtr = document.querySelector('[data-payment-utr]');
+
+      function syncUpiPayment() {
+        const isUpi = paymentMethod && paymentMethod.value === 'upi';
+        if (upiPayment) upiPayment.hidden = !isUpi;
+        if (paymentUtr) paymentUtr.required = isUpi;
+      }
+
+      if (paymentMethod) {
+        paymentMethod.addEventListener('change', syncUpiPayment);
+        syncUpiPayment();
+      }
+    </script>
+  </body>
+</html>
